@@ -1,0 +1,128 @@
+openapi: "3.0.3"
+info:
+  title: "User Service API"
+  description: "Upravljanje uporabnikov in njihovih avtomobilov."
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:8083/api/v1"
+
+paths:
+  /uporabnik/{uporabnikId}:
+    parameters:
+      - $ref: '#/components/parameters/UporabnikId'
+    get:
+      tags: [Uporabnik]
+      summary: Pridobi uporabnika
+      responses:
+        '200':
+          description: Uporabnik
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Uporabnik'
+        '404':
+          description: User not found
+    post:
+      tags: [Uporabnik]
+      summary: Ustvari uporabnika
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UporabnikInput'
+      responses:
+        '201':
+          description: Uporabnik ustvarjen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Uporabnik'
+        '400':
+          description: Invalid input
+        '409':
+          description: User already exists
+
+  /uporabnik/{uporabnikId}/avto:
+    parameters:
+      - $ref: '#/components/parameters/UporabnikId'
+    put:
+      tags: [Uporabnik]
+      summary: Nastavi ali posodobi uporabnikov avto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvtoInput'
+      responses:
+        '200':
+          description: Avto shranjen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avto'
+        '400':
+          description: Invalid input
+        '404':
+          description: User not found
+
+components:
+  parameters:
+    UporabnikId:
+      name: uporabnikId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    UporabnikInput:
+      type: object
+      required: [ime, email]
+      properties:
+        ime:
+          type: string
+          example: Nuner
+        email:
+          type: string
+          format: email
+    Uporabnik:
+      allOf:
+        - $ref: '#/components/schemas/UporabnikInput'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+            avto:
+              $ref: '#/components/schemas/Avto'
+    AvtoInput:
+      type: object
+      required: [znamka, model]
+      properties:
+        znamka:
+          type: string
+          example: Volkswagen
+        model:
+          type: string
+          example: Golf
+        letnik:
+          type: integer
+          example: 2015
+        registrska:
+          type: string
+          example: LJ AB-123
+        naprava:
+          type: string
+          description: Identifikator OBD naprave
+    Avto:
+      allOf:
+        - $ref: '#/components/schemas/AvtoInput'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
